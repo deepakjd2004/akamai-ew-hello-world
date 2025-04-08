@@ -1,0 +1,61 @@
+name: Deploy Akamai EdgeWorker
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Install Akamai CLI and EdgeWorkers CLI
+        run: |
+          npm install -g @akamai/cli
+          akamai install edgeworkers
+          
+      - name: Configure Akamai credentials
+        run: |
+          mkdir -p ~/.edgerc
+          cat > ~/.edgerc << EOF
+          [default]
+          host = ${{ secrets.AKAMAI_HOST }}
+          client_token = ${{ secrets.AKAMAI_CLIENT_TOKEN }}
+          client_secret = ${{ secrets.AKAMAI_CLIENT_SECRET }}
+          access_token = ${{ secrets.AKAMAI_ACCESS_TOKEN }}
+          EOF
+          
+      - name: Create tarball package
+        run: |
+          EDGEWORKER_ID=$(jq -r '.edgeworker.id' ew.json)
+          VERSION=$(jq -r '.edgeworker.version' ew.json)
+          akamai edgeworkers bundle
+          
+      - name: Upload EdgeWorker
+        run: |
+          EDGEWORKER_ID=$(jq -r '.edgeworker.id' ew.json)
+          VERSION=$(jq -r '.edgeworker.version' ew.json)
+          akamai edgeworkers upload --bundle $EDGEWORKER_ID $VERSION --accountkey ${{ secrets.ASK }}
+          
+      - name: Activate EdgeWorker on staging
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          EDGEWORKER_ID=$(jq -r '.edgeworker.id' ew.json)
+          VERSION=$(jq -r '.edgeworker.version' ew.json)
+          akamai edgeworkers activate $EDGEWORKER_ID $VERSION STAGING --accountkey ${{ secrets.ASK }}
+          
+      - name: Activate EdgeWorker on production
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          EDGEWORKER_ID=$(jq -r '.edgeworker.id' ew.json)
+          VERSION=$(jq -r '.edgeworker.version' ew.json)
+          akamai edgeworkers activate $EDGEWORKER_ID $VERSION PRODUCTION --accountkey ${{ secrets.ASK }}
