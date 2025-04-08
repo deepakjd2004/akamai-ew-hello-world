@@ -17,40 +17,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version: '1.22'
-
-      # Add steps to update version based on commit ID
-      - name: Set EdgeWorker version from commit ID
-        run: |
-          # Get short commit SHA (first 7 characters)
-          COMMIT_ID=$(git rev-parse --short HEAD)
-          
-          # Read the existing ew.json
-          cat ew.json | jq --arg version "$COMMIT_ID" '.edgeworker.version = $version' > ew_updated.json
-          
-          # Replace the original file
-          mv ew_updated.json ew.json
-          
-          # Display the updated version
-          echo "EdgeWorker version set to commit ID: $COMMIT_ID"
-          cat ew.json
-
-      - name: Update bundle.json version
-        run: |
-          # Get short commit SHA
-          COMMIT_ID=$(git rev-parse --short HEAD)
-          
-          # Update bundle.json
-          cat bundle.json | jq --arg version "$COMMIT_ID" '.["edgeworker-version"] = $version' > bundle_updated.json
-          mv bundle_updated.json bundle.json
-          
-          echo "Updated bundle.json version to: $COMMIT_ID"
-          cat bundle.json
-
       - name: Install Akamai CLI and EdgeWorkers CLI
         run: |
           # Set up GOPATH
@@ -105,6 +75,7 @@ jobs:
           echo $EDGEWORKER_ID
           akamai edgeworkers activate $EDGEWORKER_ID STAGING $VERSION --accountkey ${{ secrets.ASK }}
 
+
       - name: Wait for staging activation to complete
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
@@ -117,6 +88,7 @@ jobs:
           MAX_ATTEMPTS=20
           ATTEMPTS=0
           
+
           # Loop until activation is complete (status is COMPLETE)
           while [ $ATTEMPTS -lt $MAX_ATTEMPTS ]; do
             akamai edgeworkers list-activations $EDGEWORKER_ID --json activation_status.json --accountkey ${{ secrets.ASK }}
