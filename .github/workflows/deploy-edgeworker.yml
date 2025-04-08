@@ -20,7 +20,9 @@ jobs:
           
       - name: Install Akamai CLI and EdgeWorkers CLI
         run: |
-          npm install -g @akamai/cli
+          curl -sL https://github.com/akamai/cli/releases/latest/download/akamai-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m).tar.gz | tar xz
+          sudo mv akamai /usr/local/bin/akamai
+          akamai --version
           akamai install edgeworkers
           
       - name: Configure Akamai credentials
