@@ -56,13 +56,15 @@ jobs:
         run: |
           EDGEWORKER_ID=$(jq -r '.edgeworker.id' ew.json)
           VERSION=$(jq -r '.edgeworker.version' ew.json)
-          akamai edgeworkers bundle
+          tar -czvf "${EDGEWORKER_ID}_${VERSION}.tgz" main.js bundle.json
+          ls -la "${EDGEWORKER_ID}_${VERSION}.tgz"
           
       - name: Upload EdgeWorker
         run: |
           EDGEWORKER_ID=$(jq -r '.edgeworker.id' ew.json)
           VERSION=$(jq -r '.edgeworker.version' ew.json)
-          akamai edgeworkers upload --bundle $EDGEWORKER_ID $VERSION --accountkey ${{ secrets.ASK }}
+          TARBALL="${EDGEWORKER_ID}_${VERSION}.tgz"
+          akamai edgeworkers upload --bundle $TARBALL $EDGEWORKER_ID --accountkey ${{ secrets.ASK }}
           
       - name: Activate EdgeWorker on staging
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
