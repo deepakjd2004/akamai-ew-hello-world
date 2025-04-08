@@ -31,6 +31,7 @@ jobs:
           # Make it executable and move to PATH
           chmod +x akamai
           sudo mv akamai /usr/local/bin/
+          export PATH=$PATH:/usr/local/bin/
     
           # Verify installation
           akamai --version
