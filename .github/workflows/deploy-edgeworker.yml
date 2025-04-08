@@ -20,17 +20,23 @@ jobs:
           
       - name: Install Akamai CLI and EdgeWorkers CLI
         run: |
-          curl -sL https://github.com/akamai/cli/archive/refs/tags/v2.0.0.tar.gz -o akamai-cli.tar.gz
-          tar -xzf akamai-cli.tar.gz
-          cd cli-2.0.0
-          # Install dependencies and build the CLI
-          go mod download
-          go build -o akamai
-
-          sudo mv akamai /usr/local/bin/akamai
-          cd ..
+          # Download the latest release binary
+          PLATFORM=$(uname -s | tr '[:upper:]' '[:lower:]')
+          ARCH=$(uname -m)
+          if [ "$ARCH" == "x86_64" ]; then ARCH="amd64"; fi
+    
+          # Download the binary
+          curl -sL https://github.com/akamai/cli/releases/download/v2.0.0/akamai-$PLATFORM-$ARCH -o akamai
+    
+          # Make it executable and move to PATH
+          chmod +x akamai
+          sudo mv akamai /usr/local/bin/
+    
+          # Verify installation
           akamai --version
-          akamai install edgeworkers
+    
+          # Install EdgeWorkers package
+          akamai install edgeworkers  
           
       - name: Configure Akamai credentials
         run: |
