@@ -43,7 +43,7 @@ jobs:
           
       - name: Configure Akamai credentials
         run: |
-          mkdir -p ~/.edgerc
+          touch ~/.edgerc
           cat > ~/.edgerc << EOF
           [default]
           host = ${{ secrets.AKAMAI_HOST }}
