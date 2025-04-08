@@ -71,6 +71,8 @@ jobs:
         run: |
           EDGEWORKER_ID=$(jq -r '.edgeworker.id' ew.json)
           VERSION=$(jq -r '.edgeworker.version' ew.json)
+          echo "EW ID - "
+          echo $EDGEWORKER_ID
           akamai edgeworkers activate $EDGEWORKER_ID STAGING --accountkey ${{ secrets.ASK }}
           
       - name: Activate EdgeWorker on production
