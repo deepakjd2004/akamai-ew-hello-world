@@ -73,11 +73,11 @@ jobs:
           VERSION=$(jq -r '.edgeworker.version' ew.json)
           echo "EW ID - "
           echo $EDGEWORKER_ID
-          akamai edgeworkers activate $EDGEWORKER_ID STAGING --accountkey ${{ secrets.ASK }}
+          akamai edgeworkers activate $EDGEWORKER_ID STAGING $VERSION --accountkey ${{ secrets.ASK }}
           
       - name: Activate EdgeWorker on production
         if: github.event_name == 'workflow_dispatch'
         run: |
           EDGEWORKER_ID=$(jq -r '.edgeworker.id' ew.json)
           VERSION=$(jq -r '.edgeworker.version' ew.json)
-          akamai edgeworkers activate $EDGEWORKER_ID PRODUCTION --accountkey ${{ secrets.ASK }}
+          akamai edgeworkers activate $EDGEWORKER_ID PRODUCTION $VERSION --accountkey ${{ secrets.ASK }}
