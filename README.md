@@ -9,7 +9,7 @@ This repository uses GitHub Actions to automate the deployment of Akamai EdgeWor
 - Automatically packages and uploads EdgeWorker code on every push to `main`
 - Uses Git commit ID to version your EdgeWorker
 - Activates on **Staging** and **Production** automatically
-- Blocks deployment when only `README.md` is updated
+- Do not deploy when only `README.md` is updated in repository
 
 ---
 
